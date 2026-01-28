@@ -12,3 +12,9 @@ barmaid = "barmaid.cli:main"
 
 [tool.setuptools]
 packages = ["barmaid"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+    "pytest-cov>=7.0.0",
+]

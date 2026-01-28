@@ -89,7 +89,7 @@ def generate_mermaid_diagram(migrations, direction="TD", show_orphans=True):
         node_id = sanitize_node_id(rev)
         
         # Create a readable label
-        if len(rev) == 12 and all(c in '0123456789abcdef' for c in rev):
+        if len(rev) >= 12 and all(c in '0123456789abcdef' for c in rev):
             # It's a hash-like revision
             label = rev[:8]
         else:
