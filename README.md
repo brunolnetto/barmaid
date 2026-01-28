@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="images/logo.png" width="150" alt="Barmaid Logo">
+  <img src="https://github.com/brunolnetto/barmaid/blob/b425030912ebd69b1789caff63f6967847f729ac/images/logo.png?raw=true" width="150" alt="Barmaid Logo">
 </p>
 
-<h1 align="center">Barmaid 🍸</h1>
+<h1 align="center">Barmaid</h1>
 
 <p align="center">
   <strong>Visualize your Alembic migrations with style.</strong>
