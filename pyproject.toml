@@ -9,3 +9,6 @@ dependencies = []
 
 [project.scripts]
 barmaid = "barmaid.cli:main"
+
+[tool.setuptools]
+packages = ["barmaid"]
