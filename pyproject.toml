@@ -1,0 +1,11 @@
+[project]
+name = "barmaid"
+version = "0.0.1"
+description = "Convert Alembic migration history to Mermaid diagrams"
+readme = "README.md"
+authors = [{name = "Bruno Peixoto", email = "brunolnetto@gmail.com"}]
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+barmaid = "barmaid.cli:main"
