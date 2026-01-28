@@ -41,23 +41,60 @@ def process_logo(input_path, output_path, new_color=(0, 122, 255), size=(200, 20
     # Convert to numpy array for processing
     data = np.array(img)
     
-    # Separate channels
-    r, g, b, a = data[:,:,0], data[:,:,1], data[:,:,2], data[:,:,3]
+    # Calculate luminance (brightness) to use as alpha mask
+    # Standard luminance formula: 0.299R + 0.587G + 0.114B
+    luminance = (data[:,:,0] * 0.299 + data[:,:,1] * 0.587 + data[:,:,2] * 0.114)
     
-    # Create mask for white/light pixels (background)
-    white_mask = (r > threshold) & (g > threshold) & (b > threshold)
+    # Create alpha channel based on "darkness"
+    # Darker pixels = higher alpha (more opaque)
+    # Lighter pixels = lower alpha (more transparent)
+    # Map range [0, 255] -> [255, 0]
     
-    # Create mask for dark pixels (logo)
-    logo_mask = ~white_mask
+    # We want white (255) to be transparent (0)
+    # We want black (0) to be opaque (255)
+    # But we want a "cutoff" point (threshold) where it becomes fully transparent
+    
+    # Soft thresholding logic
+    # Everything above 'threshold' fades to 0
+    # Everything below 'threshold' is scaled
+    
+    # Normalize luminance relative to threshold
+    # Pixels brighter than threshold become 0 alpha
+    # Pixels darker than threshold get alpha scaled from 0-255
+    
+    alpha_mask = np.zeros_like(luminance)
+    
+    # Soft edges: calculate distance from threshold
+    # This creates a gradient instead of a hard cut
+    mask_indices = luminance < threshold
+    
+    # To get crisp but smooth edges, we map the luminance range [0, threshold] to alpha [255, 0]
+    # But maybe we just want to replace the color and keep existing anti-aliasing if the image was already transparent?
+    
+    # IMPROVED APPROACH: Use the luminance invserse as the new alpha
+    # This preserves the "softness" of the edges from the original anti-aliasing (if it existed) or creates soft edges from greyscale
+    
+    # Scale alpha: (threshold - luminance) / threshold * 255
+    # This makes pure black (0) -> 255 alpha
+    # This makes threshold value -> 0 alpha
+    
+    alpha_mask[mask_indices] = ((threshold - luminance[mask_indices]) / threshold) * 255
     
     # Create new image data
-    new_data = np.zeros_like(data)
+    new_data = np.zeros((data.shape[0], data.shape[1], 4), dtype=np.uint8)
     
-    # Set logo pixels to new color with full opacity
-    new_data[logo_mask] = [new_color[0], new_color[1], new_color[2], 255]
+    # Set RGB to new_color
+    new_data[:,:,0] = new_color[0]
+    new_data[:,:,1] = new_color[1]
+    new_data[:,:,2] = new_color[2]
     
-    # Set background to transparent
-    new_data[white_mask] = [0, 0, 0, 0]
+    # Set Alpha
+    new_data[:,:,3] = alpha_mask.astype(np.uint8)
+    
+    # Power curve to sharpen the edges while keeping them smooth (gamma correction-ish)
+    # This pushes semi-transparent pixels towards either 0 or 255 to reduce "fuzziness" while keeping AA
+    # However, for simple logo recoloring, the linear gradient above might be too soft.
+    # Let's simple apply a sigmoid-like curve or just rely on the high-res downsample.
     
     # Convert back to image
     processed_img = Image.fromarray(new_data, 'RGBA')
